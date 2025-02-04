@@ -8,12 +8,26 @@ async function seedUsers() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
   await sql`
     CREATE TABLE IF NOT EXISTS users (
-      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      user_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
       name VARCHAR(255) NOT NULL,
       email TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL
+      password TEXT NOT NULL,
+      profile_pic TEXT
     );
   `;
+
+  //   users
+  //                                          Table "public.users"
+  //    Column    |          Type          | Collation | Nullable |                 Default
+  // -------------+------------------------+-----------+----------+-----------------------------------------
+  //  user_id     | integer                |           | not null | nextval('users_user_id_seq1'::regclass)
+  //  profile_pic | character varying(255) |           |          |
+  //  email       | character varying(50)  |           |          |
+  //  password    | character varying(64)  |           |          |
+  //  name        | character varying(100) |           |          |
+  // Indexes:
+  //     "users_pkey" PRIMARY KEY, btree (user_id)
+  //     "users_email_key" UNIQUE CONSTRAINT, btree (email)
 
   const insertedUsers = await Promise.all(
     users.map(async (user) => {
@@ -42,9 +56,22 @@ async function seedInvoices() {
     );
   `;
 
+  //invoices
+  //   Table "public.invoices"
+  //   Column    |          Type          | Collation | Nullable |      Default
+  // -------------+------------------------+-----------+----------+--------------------
+  // id          | uuid                   |           | not null | uuid_generate_v4()
+  // customer_id | uuid                   |           | not null |
+  // amount      | integer                |           | not null |
+  // status      | character varying(255) |           | not null |
+  // date        | date                   |           | not null |
+  // Indexes:
+  //    "invoices_pkey" PRIMARY KEY, btree (id)
+
   const insertedInvoices = await Promise.all(
     invoices.map(
       (invoice) => sql`
+
         INSERT INTO invoices (customer_id, amount, status, date)
         VALUES (${invoice.customer_id}, ${invoice.amount}, ${invoice.status}, ${invoice.date})
         ON CONFLICT (id) DO NOTHING;
@@ -67,6 +94,17 @@ async function seedCustomers() {
     );
   `;
 
+  //   customers
+  //                             Table "public.customers"
+  //   Column   |          Type          | Collation | Nullable |      Default
+  // -----------+------------------------+-----------+----------+--------------------
+  //  id        | uuid                   |           | not null | uuid_generate_v4()
+  //  name      | character varying(255) |           | not null |
+  //  email     | character varying(255) |           | not null |
+  //  image_url | character varying(255) |           | not null |
+  // Indexes:
+  //     "customers_pkey" PRIMARY KEY, btree (id)
+
   const insertedCustomers = await Promise.all(
     customers.map(
       (customer) => sql`
@@ -87,6 +125,15 @@ async function seedRevenue() {
       revenue INT NOT NULL
     );
   `;
+
+  //   revenue
+  //                      Table "public.revenue"
+  //  Column  |         Type         | Collation | Nullable | Default
+  // ---------+----------------------+-----------+----------+---------
+  //  month   | character varying(4) |           | not null |
+  //  revenue | integer              |           | not null |
+  // Indexes:
+  //     "revenue_month_key" UNIQUE CONSTRAINT, btree (month)
 
   const insertedRevenue = await Promise.all(
     revenue.map(
