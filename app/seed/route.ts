@@ -15,8 +15,6 @@ async function seedUsers() {
     );
   `;
 
-  console.log("CREATE EXTENSION ");
-
   const insertedUsers = await Promise.all(
     users.map(async (user) => {
       const hashedPassword = await bcryptjs.hash(user.password, 10);
@@ -27,8 +25,6 @@ async function seedUsers() {
       `;
     })
   );
-
-  console.log("insertedUsers");
 
   return insertedUsers;
 }
